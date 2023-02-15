@@ -10,13 +10,14 @@
 
 set.seed(123456)
 
-n = 500
-alpha = 2
-beta = 3 
-S = rgamma(n, shape=alpha, scale=beta)
+n = 500       # number of observations in our sample
+alpha = 2     # shape
+beta = 3      # scale
+S = rgamma(n, shape=alpha, scale=beta)  # our sample data 
 
-mu = alpha * beta
+mu = alpha * beta   # population mean
 
+# let's plot the sample along with theoretical gamma pdf to see what we have
 hist(S, prob=TRUE)
 abline(v = mean(S), col="red")
 xx = seq(min(S), max(S), by=0.01)
@@ -30,7 +31,12 @@ mu; mean(S)
 #   f(x;alpha,beta) = (x^(alpha-1) * exp(-x/beta)) / (gamma(alpha)*beta^k)
 #
 # Log Likelihood formula
+#   A = alpha
+#   B = beta
 #   l(x;A,B) = -n*A*log(B) - n*log(gamma(A)) - sum(x)/B + (A-1)*sum(log(x))
+#
+# Reference:
+#   https://www.utstat.toronto.edu/~brunner/oldclass/appliedf12/lectures/2101f12Likelihood1.pdf
 #
 #############################################################################
 
@@ -44,22 +50,21 @@ gmll = function(theta, D) {
   ret = n*a*log(b) + n*lgamma(a) + sumD/b - (a-1)*sumlogD
   ret
 }
-fit = nlm(gmll, c(alpha, beta), D=S)
+E = nlm(gmll, c(alpha, beta), D=S)
+E$estimate
 
-
-# https://www.utstat.toronto.edu/~brunner/oldclass/appliedf12/lectures/2101f12Likelihood1.pdf
 # Gamma Minus Log Likelihood
 gmll2 <- function(theta, D) {
   ret = -sum(dgamma(D, shape=theta[1], scale=theta[2], log=TRUE))
   ret
 }
-fit2 = nlm(gmll2, c(alpha, beta), D=S)
-
+E = nlm(gmll2, c(alpha, beta), D=S)
+E2$estimate
 
 
 # ---------------- FINAL ESTIMATE ----------------
-alpha.hat = fit$estimate[1]     # 1.970140
-beta.hat = fit$estimate[2]      # 3.000276
+alpha.hat = E$estimate[1]     # 1.970140
+beta.hat = E$estimate[2]      # 3.000276
 
 
 # ---------------- COMMENTS ----------------
@@ -69,15 +74,36 @@ beta.hat = fit$estimate[2]      # 3.000276
 # So ... pretty good estimates!  
 
 
+####################################################
+#               ALTERNATIVE METHOD                 #
+####################################################
+
+alpha = seq(0.001, 5, by=0.0001)
+beta = 3
+L = -n*alpha*log(beta) - n*log(gamma(alpha)) - sum(S)/beta + (alpha-1)*sum(log(S))
+plot(alpha, L, type="l")
+alpha.hat = alpha[which.max(L)]
+abline(v=alpha.hat, col="red")
+alpha.hat
+
+
+beta = seq(0.001, 6, by=0.0001)
+alpha = 2
+L2 = -n*alpha*log(beta) - n*log(gamma(alpha)) - sum(S)/beta + (alpha-1)*sum(log(S))
+plot(beta, L2, type="l")
+beta.hat = beta[which.max(L2)]
+abline(v=beta.hat, col="red")
+beta.hat
+
+# summary
+alpha.hat  # 1.9703
+beta.hat   # 2.9555
 
 
 
-# read this first
+
+
+
 # https://machinelearningmastery.com/linear-regression-with-maximum-likelihood-estimation/
 
-
-
-# https://stats.stackexchange.com/questions/262871/parameter-estimation-of-gamma-distribution-using-r
-# https://www.youtube.com/watch?v=ZDg9uWzDB0A
-# https://www.youtube.com/watch?v=GyEYKasQTFg
 
