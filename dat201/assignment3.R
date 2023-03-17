@@ -88,10 +88,11 @@ interval - interval2                     # 0.2200583
 # 2. What proportion of the variability in y(length) explained by the linear 
 #    relationship
 
+r.sq = fish.sum$r.squared     #0.8165
+
 # Coefficient of Determination R^2 
 # This tells us that approximately 81.7% of the observed variations in fish 
 # length can be explained by this regression model.
-r.sq = fish.sum$r.squared     #0.8165
 
 
 
@@ -129,6 +130,13 @@ p.value = fish.sum$coefficients[2,4]     # 5.515796e-163
 # Describes the deviation from the model that the observed data represents. 
 rse = fish.sum$sigma      # 28.65
 
+# Using this we can determine a 95% prediction interval. For any prediction of 
+# fish length for a given fish age, we can expect to see values above and 
+# below the predicted amount by this interval 95% of the time.  
+# (Also calculated above and, shown on the plots, and mentioned in the equation 
+# for the line of regression.)  
+t.val = qt(0.975, n-2)
+interval = t.val * se     # 56.3
 
 
 # ---------------------------------------------------------------------------
@@ -143,43 +151,4 @@ corr = cor(df$Length, df$Age)    # 0.9035912
 # +1, which means that the fish length (y) and age (x) have a very strong 
 # linear relationship.
 
-
-
-
-
-
-
-# ---------------------------------------------------------------------------
-#                          ALTERNATIVE METHODS
-# ---------------------------------------------------------------------------
-# can also calculate the coefficients manually (Devore p. 479)
-n = length(df$Age)
-S.xy = sum(df$Age * df$Length) - ( sum(df$Age) * sum(df$Length) / n)
-S.xx = sum(df$Age ^ 2) - (sum(df$Age)^2)/n
-B1.hat = S.xy / S.xx
-B0.hat = mean(df$Length) - B1.hat * mean(df$Age)
-
-# the final fitted linear equation as a function 
-f = function(x) {
-  y = 65.5272 + 30.3239 * x
-  return(y)
-}
-
-# (optional) Let's calculate and analyze the deviations (residuals)
-error = df$Length - f(df$Age)
-summary(error)  # matches summary(fit)
-sd(error)       # matches Residual standard error: 28.65 on 437 df
-sum(error)      # should be close to 0 
-
-
-# t-test statistic = b1 / std err(b1)
-se = fish.sum$coefficients[2,2]
-tstat = b1 / se
-n = length(df$Age)
-c(-1,1)*qt(0.025, n-2, lower=F)*se
-
-# make a new prediciton for age = 5.5
-f = data.frame(Age=5.5)
-predict(fish.mod, newdata=f, interval="confidence")
-predict(fish.mod, newdata=f, interval="prediction")
 
