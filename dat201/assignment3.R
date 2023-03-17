@@ -23,11 +23,64 @@ df = read.csv("assignment3.csv")
 
 # ---------------------------------------------------------------------------
 # 1. What is the fitted regression line
-fit = lm(Length~Age, data = df)   
-plot(df$Age, df$Length)
-abline(fit, col="red")
+fish.mod = lm(Length~Age, data = df)
+fish.res = residuals(fish.mod)
+fish.sum = summary(fish.mod)
 
-summary(fit)
+# pull out some useful parameters
+b0 = fish.mod$coefficients[1]   # y-intercept
+b1 = fish.mod$coefficients[2]   # slope of the line
+se = fish.sum$sigma             # std dev of the residuals
+n = nrow(df)                    # number of observations
+
+
+par(mfrow=c(2,2))
+
+# scatter plot with the fitted regression line 
+plot(df$Age, df$Length, 
+     xlab="Fish Age", 
+     ylab="Fish Length", 
+     main="Estimated Line of Regression")
+abline(fish.mod, col="steelblue", lwd=2)
+
+# Add the 95% prediction interval
+t.val = qt(0.975, n-2)
+interval = t.val * se
+abline(b0 + interval, b1, col="steelblue", lty=2)
+abline(b0 - interval, b1, col="steelblue", lty=2)
+
+# quantile-quantile plot 
+qqnorm(fish.res)
+qqline(fish.res, col="red", lty=2)
+
+# plot of residuals and their expected mean (=0)
+plot(df$Age, fish.res, 
+     xlab="Fish Age", 
+     ylab="Residuals", 
+     main="Plot of Residuals")
+abline(h=0, col="red", lty=2)
+
+# histogram of residuals with normal distribution curve 
+hist(fish.res, prob=TRUE)
+xx = seq(min(fish.res), max(fish.res), length=1000)
+lines(xx, dnorm(xx, mean=mean(fish.res), sd=sd(fish.res)), col="red")
+#abline(v=mean(fish.res), col="steelblue")
+
+interval2 = qnorm(0.975) * sd(fish.res)
+abline(v=interval2, col="red", lty=2)
+abline(v=-interval2, col="red", lty=2)
+
+summary(fish.res)    # median=-4.5, mean=0
+
+# Despite the distribution of residuals being rightly skewed (median < mean)
+# these values for intervals are close (within 0.39% of each other).
+interval - interval2                     # 0.2200583
+(interval - interval2) / interval * 100  # 0.39%
+
+# CONCLUSION
+# Predicted values for fish length can be predicted with a given age using the
+# following linear equation and with the 95% prediction interval
+#     Length = 65.5 + 30.3 * Age  (+- 56.3)
 
 
 
@@ -35,10 +88,10 @@ summary(fit)
 # 2. What proportion of the variability in y(length) explained by the linear 
 #    relationship
 
-# Coefficient of Determination R^2 -> from summary(fit)
-r.sq = 0.8165
+# Coefficient of Determination R^2 
 # This tells us that approximately 81.7% of the observed variations in fish 
-# length can be explained by this regression model.  
+# length can be explained by this regression model.
+r.sq = fish.sum$r.squared     #0.8165
 
 
 
@@ -46,21 +99,25 @@ r.sq = 0.8165
 # 3. What is the slope of the regression line. Does the true slope is equal 
 #    to 0? Provide your answer using the hypothesis testing.
 
-slope = b1 = fit$coefficients[2]           # 30.3
+slope = b1 = fish.mod$coefficients[2]    # 30.3
+
+# A true slope of 0 implies that there is no relationship between fish weight
+# and age.  Let's set up our null and alternative hypotheses. 
 
 #      null hypothesis H0:  b1 = 0
 #       alt hypothesis Ha:  b1 != 0
 
-p.value = summary(fit)$coefficients[2,4]   # <2e-16
+# First, let's assume H0 is valid.  In this case, we determine the probability 
+# that we would see the same results we found in the sample.  Let's also assume
+# a 95% confidence interval, meaning if the probability that b1 = 0 is less 
+# than 5%, we will reject H0.
+
+p.value = fish.sum$coefficients[2,4]     # 5.515796e-163
 
 # CONCLUSION:
-# A very small value for p implies very strong evidence to reject H0 and 
-# accept Ha.  Therefore, we are more than 99.999% confident that the true
-# slope is not 0.  
-
-# t-test statistic = b1 / std err(b1)
-se = summary(fit)$coefficients[2,2]
-tstat = b1 / se
+# This very small value for p implies very strong evidence to reject H0 and 
+# accept Ha.  Furthermore, it can be stated that we are more than 99.999% 
+# confident (1-p.value) that the true slope is not 0.  
 
 
 
@@ -68,9 +125,9 @@ tstat = b1 / se
 # 4. What measures the amount of variability in y(length) about the line at 
 #    a given value of x(age). Provide the numeric value from the R output.
 
-# Residual standard error -> from summary(fit)
+# Residual standard error
 # Describes the deviation from the model that the observed data represents. 
-rse = 28.65
+rse = fish.sum$sigma      # 28.65
 
 
 
@@ -92,8 +149,10 @@ corr = cor(df$Length, df$Age)    # 0.9035912
 
 
 
-
-# can also calculate these manually (Devore p. 479)
+# ---------------------------------------------------------------------------
+#                          ALTERNATIVE METHODS
+# ---------------------------------------------------------------------------
+# can also calculate the coefficients manually (Devore p. 479)
 n = length(df$Age)
 S.xy = sum(df$Age * df$Length) - ( sum(df$Age) * sum(df$Length) / n)
 S.xx = sum(df$Age ^ 2) - (sum(df$Age)^2)/n
@@ -109,9 +168,18 @@ f = function(x) {
 # (optional) Let's calculate and analyze the deviations (residuals)
 error = df$Length - f(df$Age)
 summary(error)  # matches summary(fit)
-sd(error)       # matches "Residual standard error: 28.65 on 437 degrees of freedom"
+sd(error)       # matches Residual standard error: 28.65 on 437 df
 sum(error)      # should be close to 0 
 
-sigma.hat = sum(df$Length - f(df$Age)) ^ 2 / (n-2)   # not working
 
+# t-test statistic = b1 / std err(b1)
+se = fish.sum$coefficients[2,2]
+tstat = b1 / se
+n = length(df$Age)
+c(-1,1)*qt(0.025, n-2, lower=F)*se
+
+# make a new prediciton for age = 5.5
+f = data.frame(Age=5.5)
+predict(fish.mod, newdata=f, interval="confidence")
+predict(fish.mod, newdata=f, interval="prediction")
 
