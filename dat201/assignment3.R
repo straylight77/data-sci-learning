@@ -132,9 +132,12 @@ rse = fish.sum$sigma      # 28.65
 
 # Using this we can determine a 95% prediction interval. For any prediction of 
 # fish length for a given fish age, we can expect to see values above and 
-# below the predicted amount by this interval 95% of the time.  
-# (Also calculated above and, shown on the plots, and mentioned in the equation 
-# for the line of regression.)  
+# below the predicted amount by this interval 95% of the time. 
+#
+#   i.e.  predicted Length = regression(Age) +/- interval
+#
+# (This was also calculated above, shown on the plots, and mentioned in the 
+# equation for the line of regression.)  
 t.val = qt(0.975, n-2)
 interval = t.val * se     # 56.3
 
