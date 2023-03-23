@@ -23,7 +23,16 @@
 
 
 setwd("~/data-sci-learning/dat201/")
-df = read.csv("UNLifeExpectancy.csv")
+df.raw = read.csv("UNLifeExpectancy.csv")
+
+summary(df.raw)
+
+df.raw[ is.na(df.raw$FERTILITY), ]
+df.raw[ is.na(df.raw$PUBLICEDUCATION), ]
+
+#TODO: should add some initial summary stats and cleaning
+
+df = df.raw
 
 # ----------------------------------------------------------------------------
 # 1. Examining the relation between y = LIFEEXP and x = FERTILITY.
@@ -74,16 +83,18 @@ m2.summ
 #    a. Interpret the regression coefficient associated with public education.
 
 B2 = coef(m2)["PUBLICEDUCATION"]               # -0.1846076
+round(B2, 3)
 
-# With each one-unit increase in public education, we expect a drop in life
-# expectancy by 1.85.
+# According to this model, with each one-unit increase in public education we 
+# expect a drop in life expectancy by 0.185 years.
+
 
 # ----------------------------------------------------------------------------
 #    b. Interpret the regression coefficient associated with health expenditures 
 #       without using the logarithmic scale for expenditures.
 
 # To restate our regression equation:
-#            y = B0 + B1*x1 + B2*x2 + B3*log(x3)   where x3 => lnHEALTH
+#            y = B0 + B1*x1 + B2*x2 + B3*log(x3)    where x3 => lnHEALTH
 #
 # A change in y will be calculated as: 
 #      delta.y = y.new - y.old
@@ -123,8 +134,9 @@ alpha = 0.05
 
 t.stat = m2.summ$coefficients[3,3]      # -0.688
 p.value = m2.summ$coefficients[3,4]     #  0.493
-
 p.value < alpha                         # FALSE
+
+round(c("alpha"=alpha, "T"=t.stat, "P"=p.value), 3)
 
 # Since p.value is greater than alpha, we fail to reject the null
 # hypothesis.
