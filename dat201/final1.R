@@ -58,8 +58,14 @@ abline(m, col="red")
 f = data.frame(FERTILITY = 2.0)
 p = predict(m, newdata=f, interval="confidence")
 
-round(p, 2)            #   fit   lwr   upr
-                       # 73.19 72.01 74.37
+round(p, 2)
+
+# RESULTS:
+#       fit   lwr   upr
+#     73.19 72.01 74.37
+#
+# The fitted life expectancy for the United States is 73.2 years with a 95% 
+# confidence interval of 72.0-74.3 years.
 
 
 
@@ -79,6 +85,8 @@ m2 = lm(LIFEEXP ~ FERTILITY + PUBLICEDUCATION + lnHEALTH, data=df)
 m2.summ = summary(m2)
 m2.summ
 
+
+
 # ----------------------------------------------------------------------------
 #    a. Interpret the regression coefficient associated with public education.
 
@@ -87,6 +95,7 @@ round(B2, 3)
 
 # According to this model, with each one-unit increase in public education we 
 # expect a drop in life expectancy by 0.185 years.
+
 
 
 # ----------------------------------------------------------------------------
