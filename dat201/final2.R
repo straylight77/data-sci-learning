@@ -30,12 +30,35 @@ df = data.frame(
   )
 attach(df)
 pairs(df, lower.panel=NULL, gap=0)
-pairs(lnFACE ~ GENDER + AGE + lnINCOME, data=df, lower.panel=NULL)
 
-plot(lnINCOME, lnFACE)
-df.cor = cor(df)
+
+
+plot(df$lnINCOME, df$lnFACE)
+df.cor = cor(df, use="complete.obs")
 
 library(corrplot)
 corrplot(df.cor, method="ellipse")
 corrplot(df.cor, method="number")
+
+
+# ----------------------------------------------------------------------------
+# 1. How gender, age and income (explanatory variables) are related to FACE 
+# (dependent variable) and each other.
+# a. Use graphs/figures to show the relationships
+
+pairs(~ FACE + GENDER + AGE + lnINCOME, data=df, lower.panel=NULL, gap=0)
+pairs(df, lower.panel=NULL, gap=0)
+
+
+# ----------------------------------------------------------------------------
+# 2. Can gender, age and income help explain the FACE
+#    a. Run a multiple linear regression
+
+m = lm(FACE ~ GENDER + AGE + lnINCOME, data=df)
+
+#    b. Find the estimated regression parameters
+
+#    c. Use Rsq, Rsq_Adj, MSE to show performance of explanatory variables
+
+#    d. Use T‐test to show – how important the explanatory variables are
 
