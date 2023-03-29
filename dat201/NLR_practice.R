@@ -3,20 +3,11 @@
 #install.packages("minpack.lm")
 library(minpack.lm)
 
-f.exponential = function(x, A=0, B=1, C=1, err=NA) {
-  if ( is.na(err) ){
-    e = 0
-  } else {
-    e = rnorm(length(x), sd=err)
-  }
-  A + B * C^x + e
-}
-
 
 # ----------------------------------------------------------------------------
 # exponential:  y = A + B * C^x + e
 A = 500
-B = 0.5
+B = 1
 C = 2
 err = 50
 
@@ -38,7 +29,7 @@ AIC(m1)
 A = 500
 B = 5
 C = 2
-err = 50
+err = 80
 
 x = seq(1, 10, by=0.1)
 e = rnorm(length(x), sd=err)
@@ -83,7 +74,7 @@ abline(h=cf[1], col="blue", lty=2)
 # Michaelis Menten:  y = (A*x)/(B+x)
 A = 500
 B = 20
-err = 25
+err = 50
 
 x = seq(1, 50, by=0.5)
 e = rnorm(length(x), sd=err)
@@ -97,3 +88,45 @@ cf = coef(m1)
 curve( (cf[1]*x)/(cf[2]+x), add=TRUE, col="blue")
 AIC(m1)
 
+
+
+# ----------------------------------------------------------------------------
+A = 5000
+B = -3
+C = 20
+err = 200
+
+x = seq(1, 25, by=0.1)
+e = rnorm(length(x), sd=err)
+#y = A+B*x^C + e
+y = A+B*(x-C)^2 + e
+plot(x, y)
+
+
+# try parabolic first
+m.para = nlsLM(y ~ a+b*(x-c)^2, start=c(a=4000, b=1, c=100))
+m.para.summ = summary(m.para)
+cf = coef(m.para)
+curve( cf[1]+cf[2]*(x-cf[3])^2, add=TRUE, col="blue" )
+r.para = c(err = m.para.summ$sigma, aic=AIC(m.para))
+
+
+# MM next
+m.mm = nlsLM(y ~ (a*x)/(b+x), start=c(a=5000, b=5))
+m.mm.summ = summary(m.mm)
+cf = coef(m.mm)
+curve( (cf[1]*x)/(cf[2]+x), add=TRUE, col="purple")
+r.mm = c(err = m.mm.summ$sigma, aic=AIC(m.mm))
+
+
+# logarithmic
+m.log = nlsLM(y ~ a+b*x^c, start=c(a=5000, b=-2000, c=-1))
+m.log.summ = summary(m.log)
+cf = coef(m.log)
+curve(cf[1]+cf[2]*x^cf[3], add=TRUE, col="orange")
+r.log = c(err = m.log.summ$sigma, aic=AIC(m.log))
+
+results = data.frame(PARA=r.para, MM=r.mm, LOG=r.log)
+round(results, 2)
+
+curve(A+B*(x-C)^2, add=TRUE, col="red", lty=2, lwd=2)
