@@ -26,6 +26,7 @@
 
 setwd("~/data-sci-learning/dat201/")
 df.raw = read.csv("TermLife.csv")
+str(df.raw)
 
 plot(FACE ~ INCOME, data=df.raw)           # heavily clustered in bottom-left
 plot(FACE ~ log(INCOME), data=df.raw)      # still clustered around x-axis
@@ -40,9 +41,9 @@ nrow(df.raw[ df.raw$FACE == 0, ]) / nrow(df.raw) * 100
 # transformation on these since it will result in -Inf which won't work for a 
 # linear regression.  
 #
-# ASSUMPTION: We can drop the rows in df1 where FACE == 0.  The assumption here is that
-# these are incidents where customers did not buy insurance.  We can determine 
-# a regression model only for customers who purchased.  
+# ASSUMPTION: We can drop the rows in df1 where FACE == 0.  The assumption 
+# is that these are incidents where customers did not buy insurance.  We will
+# determine a regression model only for customers who purchased.  
 
 
 # Ceate a final data frame (df) that will be used for the remaining analysis
@@ -87,6 +88,8 @@ B1 = cf[2]
 B2 = cf[3]
 B3 = cf[4]
 
+round(cf, 3)
+
 # RESULTS:
 #      (Intercept)      GENDER         AGE    lnINCOME 
 #            4.502       0.876      -0.010       0.647 
@@ -101,8 +104,9 @@ B3 = cf[4]
 rsq     = m.summ$r.squared             # 0.261
 rsq.adj = m.summ$adj.r.squared         # 0.253
 mse     = mean(m.summ$residuals^2)     # 2.577
-S       = m.summ$sigma                 # 1.617
-perf    = c(RSQ=rsq, RSQA=rsq.adj, MSE=mse, S=S)
+se      = m.summ$sigma                 # 1.617
+
+perf    = c(RSQ=rsq, RSQA=rsq.adj, MSE=mse, SE=se)
 round(perf, 3)
 
 # RESULTS:
