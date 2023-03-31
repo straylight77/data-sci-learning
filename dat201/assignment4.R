@@ -163,7 +163,6 @@ rpart.plot(tree)
 #| overall lack of fit by a factor of cp is not attempted.  This is to save 
 #| computing time by pruning off splits that are obviously not worthwhile.
 
-
 #| Prints a table of optimal prunings based on a complexity parameter.  
 printcp(tree)
 # Classification tree:
@@ -184,9 +183,6 @@ printcp(tree)
 #| mean lies below the horizontal line.
 plotcp(tree)
 
-
- 
- 
 # https://cran.r-project.org/web/packages/rpart/vignettes/longintro.pdf
 # – cp: The threshold complexity parameter (you realy have to
 #understand the theory to fully understand what is going on behind the seen)
@@ -198,12 +194,11 @@ plotcp(tree)
 
 #| Create another model with a different value for cp
 tree <- rpart(yesno ~., data = train,cp=0.07444)
- 
- 
+
 # Confusion matrix -train
 
-#| Uses the testing data, which is a portion of our original dataset that the 
-#| model has never seen yet, and predicts the outcome for each. 
+#| Use the testing data, which is a portion of our original dataset that the 
+#| model has never seen yet, to predict the outcome for each. 
 p <- predict(tree, train, type = 'class')
 
 #| Then, by creating a confusion model, we can evaluate the performance of this 
@@ -214,8 +209,6 @@ confusionMatrix(p, train$yesno, positive="y")
 #| data?  It should be the following, no?
 p <- predict(tree, test, type = 'class')
 confusionMatrix(p, test$yesno, positive="y")
-
-
 
 #Please make sure you mention positive classes in the confusion matrix.
 # 
@@ -243,6 +236,7 @@ confusionMatrix(p, test$yesno, positive="y")
 # 
 #  
 
+#| SPAM CLASSIFIER PERFORMANCE RESULTS:
 #| The accuracy of this model is 85% which is pretty good.  
 
 
@@ -261,7 +255,10 @@ plot.roc(r1,
         auc.polygon.col="lightblue",
         print.thres=TRUE,
         main= 'ROC Curve')
- 
+
+#| TODO: https://www.dataschool.io/roc-curves-and-auc-explained/
+
+
 # Method 2- Regression  Tree
 
 data('BostonHousing')
