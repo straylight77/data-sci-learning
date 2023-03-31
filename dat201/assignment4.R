@@ -148,7 +148,7 @@ str(spam7)
 # Tree Classification
 
 ?rpart # algorithm that creates the dicisions
-?rpart.object. # algorithm that creates the dicisions
+?rpart.object # algorithm that creates the dicisions
  
 tree <- rpart(yesno ~., data = train)
 rpart.plot(tree)
