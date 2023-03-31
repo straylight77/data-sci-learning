@@ -154,36 +154,46 @@ tree <- rpart(yesno ~., data = train)
 rpart.plot(tree)
  
 
- printcp(tree)
- # Classification tree:
- #   rpart(formula = yesno ~ ., data = train)
- # Variables actually used in tree construction:
- #   [1] bang    crl.tot dollar
- # Root node error: 900/2305 = 0.39046
- # n= 2305
- # CP nsplit rel error  xerror     xstd
- # 1 0.474444      0   1.00000 1.00000 0.026024
- # 2 0.074444      1   0.52556 0.56556 0.022128
- # 3 0.010000      3   0.37667 0.42111 0.019773
- plotcp(tree)
+printcp(tree)
+# Classification tree:
+#   rpart(formula = yesno ~ ., data = train)
+# Variables actually used in tree construction:
+#   [1] bang    crl.tot dollar
+# Root node error: 900/2305 = 0.39046
+# n= 2305
+# CP nsplit rel error  xerror     xstd
+# 1 0.474444      0   1.00000 1.00000 0.026024
+# 2 0.074444      1   0.52556 0.56556 0.022128
+# 3 0.010000      3   0.37667 0.42111 0.019773
+plotcp(tree)
 
+#| cp is the "complexity paramter".  rpart() uses it to determine a threshold
+#| value of when to attempt a split.  Any split that does not decrease the 
+#| overall lack of fit by a factor of cp is not attempted.  This is to save 
+#| computing time by pruning off splits that are obviously not worthwhile.
  
- # https://cran.r-project.org/web/packages/rpart/vignettes/longintro.pdf
- # – cp: The threshold complexity parameter (you realy have to
- #understand the theory to fully understand what is going on behind the seen)
  
- # You can change the cp value according to your data set. 
- # Please note lower cp value means bigger the tree. 
- #If you are using too lower cp that leads to overfitting also.
- # 
- tree <- rpart(yesno ~., data = train,cp=0.07444)
+# https://cran.r-project.org/web/packages/rpart/vignettes/longintro.pdf
+# – cp: The threshold complexity parameter (you realy have to
+#understand the theory to fully understand what is going on behind the seen)
+ 
+# You can change the cp value according to your data set. 
+# Please note lower cp value means bigger the tree. 
+#If you are using too lower cp that leads to overfitting also.
+# 
+tree <- rpart(yesno ~., data = train,cp=0.07444)
  
  
 # Confusion matrix -train
 
- p <- predict(tree, train, type = 'class')
- confusionMatrix(p, train$yesno, positive="y")
- 
+p <- predict(tree, train, type = 'class')
+#| Uses the training data, which is a portion of our original dataset that the 
+#| model has never seen yet, and predicts the outcome for each. 
+
+confusionMatrix(p, train$yesno, positive="y")
+#| Then, by creating a confusion model, we can evaluate the performance of this 
+#| model. 
+
 #Please make sure you mention positive classes in the confusion matrix.
 # 
 #  Confusion Matrix and Statistics
@@ -197,7 +207,7 @@ rpart.plot(tree)
 #  P-Value [Acc > NIR] : < 2.2e-16      
 #  Kappa : 0.6857         
 #  Mcnemar's Test P-Value : 5.061e-06      
-#            Sensitivity : 0.7644         
+#             Sensitivity : 0.7644         
 #             Specificity : 0.9096         
 #          Pos Pred Value : 0.8442         
 #          Neg Pred Value : 0.8577         
@@ -210,86 +220,87 @@ rpart.plot(tree)
 # 
 #  
 
+#| The accuracy of this model is 85% which is pretty good.  
+
+
 #ROC
- p1 <- predict(tree, test, type = 'prob')
- p1 <- p1[,2]
- r <- multiclass.roc(test$yesno, p1, percent = TRUE)
- roc <- r[['rocs']]
- r1 <- roc[[1]]
- plot.roc(r1,
-          print.auc=TRUE,
-          auc.polygon=TRUE,
-          grid=c(0.1, 0.2),
-          grid.col=c("green", "red"),
-          max.auc.polygon=TRUE,
-          auc.polygon.col="lightblue",
-          print.thres=TRUE,
-          main= 'ROC Curve')
+p1 <- predict(tree, test, type = 'prob')
+p1 <- p1[,2]
+r <- multiclass.roc(test$yesno, p1, percent = TRUE)
+roc <- r[['rocs']]
+r1 <- roc[[1]]
+plot.roc(r1,
+        print.auc=TRUE,
+        auc.polygon=TRUE,
+        grid=c(0.1, 0.2),
+        grid.col=c("green", "red"),
+        max.auc.polygon=TRUE,
+        auc.polygon.col="lightblue",
+        print.thres=TRUE,
+        main= 'ROC Curve')
  
- # Method 2- Regression  Tree
+# Method 2- Regression  Tree
+
+data('BostonHousing')
+mydata <- BostonHousing
  
- data('BostonHousing')
- mydata <- BostonHousing
- 
- #Data Partition
- set.seed(1234)
- ind <- sample(2, nrow(mydata), replace = T, prob = c(0.5, 0.5))
- train <- mydata[ind == 1,]
- test <- mydata[ind == 2,]
- #Regression tree
- tree <- rpart(medv ~., data = train)
- rpart.plot(tree)
- 
- 
- 
- printcp(tree)
- # Regression tree:
- #   rpart(formula = medv ~ ., data = train)
- # Variables actually used in tree construction:
- #   [1] age   crim  lstat rm  
- # Root node error: 22620/262 = 86.334
- # n= 262
- # CP nsplit rel error  xerror     xstd
- # 0.469231      0   1.00000 1.01139 0.115186
- # 2 0.128700      1   0.53077 0.62346 0.080154
- # 3 0.098630      2   0.40207 0.51042 0.076055
- # 4 0.033799      3   0.30344 0.42674 0.069827
- # 5 0.028885      4   0.26964 0.39232 0.066342
- # 6 0.028018      5   0.24075 0.37848 0.066389
- # 7 0.015141      6   0.21274 0.34877 0.065824
- # 8 0.010000      7   0.19760 0.33707 0.065641
- rpart.rules(tree)
- #medv                                                                       
- # 13 when lstat >=        14.8 & crim >= 5.8   
- # 17 when lstat >=        14.8 & crim <  5.8    
- # 22 when lstat is 7.2 to 14.8 & rm <  6.6                                    
- # 26 when lstat <  7.2         & rm <  6.8        & age <  89                 
- # 29 when lstat is 7.2 to 14.8 & rm >=        6.6                             
- # 33 when lstat <  7.2         & rm is 6.8 to 7.5 & age <  89                 
- # 40 when lstat <  7.2         & rm <  7.5        & age >= 89                 
- # 45 when lstat <  7.2         & rm >=        7.5       
- 
- plotcp(tree)
- 
- 
- 
- # Predict
- p <- predict(tree, train)
- # Root Mean Square Error
- 
- sqrt(mean((train$medv-p)^2))
- #4.130294
- 
- # R Square
- 
- (cor(train$medv,p))^2
- #0.8024039
- 
- # Conclusion
- # In the regression model, the r square value is 80% 
- # and RMSE is 4.13, not bad at all.
- # .In this way, you can make use of 
- # Decision classification regression tree models.
- # 
+#Data Partition
+set.seed(1234)
+ind <- sample(2, nrow(mydata), replace = T, prob = c(0.5, 0.5))
+train <- mydata[ind == 1,]
+test <- mydata[ind == 2,]
+#Regression tree
+tree <- rpart(medv ~., data = train)
+rpart.plot(tree)
+
+
+printcp(tree)
+# Regression tree:
+#   rpart(formula = medv ~ ., data = train)
+# Variables actually used in tree construction:
+#   [1] age   crim  lstat rm  
+# Root node error: 22620/262 = 86.334
+# n= 262
+# CP nsplit rel error  xerror     xstd
+# 0.469231      0   1.00000 1.01139 0.115186
+# 2 0.128700      1   0.53077 0.62346 0.080154
+# 3 0.098630      2   0.40207 0.51042 0.076055
+# 4 0.033799      3   0.30344 0.42674 0.069827
+# 5 0.028885      4   0.26964 0.39232 0.066342
+# 6 0.028018      5   0.24075 0.37848 0.066389
+# 7 0.015141      6   0.21274 0.34877 0.065824
+# 8 0.010000      7   0.19760 0.33707 0.065641
+rpart.rules(tree)
+#medv                                                                       
+# 13 when lstat >=        14.8 & crim >= 5.8   
+# 17 when lstat >=        14.8 & crim <  5.8    
+# 22 when lstat is 7.2 to 14.8 & rm <  6.6                                    
+# 26 when lstat <  7.2         & rm <  6.8        & age <  89                 
+# 29 when lstat is 7.2 to 14.8 & rm >=        6.6                             
+# 33 when lstat <  7.2         & rm is 6.8 to 7.5 & age <  89                 
+# 40 when lstat <  7.2         & rm <  7.5        & age >= 89                 
+# 45 when lstat <  7.2         & rm >=        7.5       
+
+plotcp(tree)
+
  
  
+# Predict
+p <- predict(tree, train)
+# Root Mean Square Error
+ 
+sqrt(mean((train$medv-p)^2))
+#4.130294
+ 
+# R Square
+ 
+(cor(train$medv,p))^2
+#0.8024039
+ 
+# Conclusion
+# In the regression model, the r square value is 80% 
+# and RMSE is 4.13, not bad at all.
+# .In this way, you can make use of 
+# Decision classification regression tree models.
+# 
+
