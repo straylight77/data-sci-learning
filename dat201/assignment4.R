@@ -135,25 +135,36 @@ str(spam7)
 # data description
 ?spam7
 
-
-
-
- mydata <- spam7
+mydata <- spam7
  
 # Data Partition
- set.seed(1234)
- ind <- sample(2, nrow(mydata), replace = T, prob = c(0.5, 0.5))
- train <- mydata[ind == 1,]
- test <- mydata[ind == 2,]
-# Tree Classification
+#| Separate our original data sample into two parts: training and testing.
+#| The training data will be used to determine the details of the model (i.e.
+#| the coefficients, branches, etc.)  The test data will be used to check the
+#| performance (i.e. accuracy, recall, etc.) This is a good way to test since 
+#| the model has never seen the test before and is not influcenced by it. 
+set.seed(1234)
+ind <- sample(2, nrow(mydata), replace = T, prob = c(0.5, 0.5))
+train <- mydata[ind == 1,]
+test <- mydata[ind == 2,]
 
+# Tree Classification
 ?rpart # algorithm that creates the dicisions
 ?rpart.object # algorithm that creates the dicisions
- 
+
+#| The next 2 lines creates a new classification model using the training data
+#| and plots a diagram of it.  
+
 tree <- rpart(yesno ~., data = train)
 rpart.plot(tree)
- 
 
+#| cp is the "complexity paramater".  rpart() uses it to determine a threshold
+#| value of when to attempt a split.  Any split that does not decrease the 
+#| overall lack of fit by a factor of cp is not attempted.  This is to save 
+#| computing time by pruning off splits that are obviously not worthwhile.
+
+
+#| Prints a table of optimal prunings based on a complexity parameter.  
 printcp(tree)
 # Classification tree:
 #   rpart(formula = yesno ~ ., data = train)
@@ -161,38 +172,50 @@ printcp(tree)
 #   [1] bang    crl.tot dollar
 # Root node error: 900/2305 = 0.39046
 # n= 2305
-# CP nsplit rel error  xerror     xstd
+#         CP nsplit rel error  xerror     xstd
 # 1 0.474444      0   1.00000 1.00000 0.026024
 # 2 0.074444      1   0.52556 0.56556 0.022128
 # 3 0.010000      3   0.37667 0.42111 0.019773
+
+#| A visual representation of the same information given by printcp(). The mean 
+#| and standard deviation of the errors in the cross-validated prediction 
+#| against each of the geometric means, and these are plotted by this function.
+#| A good choice of cp for pruning is often the leftmost value for which the 
+#| mean lies below the horizontal line.
 plotcp(tree)
 
-#| cp is the "complexity paramter".  rpart() uses it to determine a threshold
-#| value of when to attempt a split.  Any split that does not decrease the 
-#| overall lack of fit by a factor of cp is not attempted.  This is to save 
-#| computing time by pruning off splits that are obviously not worthwhile.
+
  
  
 # https://cran.r-project.org/web/packages/rpart/vignettes/longintro.pdf
 # – cp: The threshold complexity parameter (you realy have to
 #understand the theory to fully understand what is going on behind the seen)
- 
+
 # You can change the cp value according to your data set. 
 # Please note lower cp value means bigger the tree. 
 #If you are using too lower cp that leads to overfitting also.
-# 
+#
+
+#| Create another model with a different value for cp
 tree <- rpart(yesno ~., data = train,cp=0.07444)
  
  
 # Confusion matrix -train
 
-p <- predict(tree, train, type = 'class')
-#| Uses the training data, which is a portion of our original dataset that the 
+#| Uses the testing data, which is a portion of our original dataset that the 
 #| model has never seen yet, and predicts the outcome for each. 
+p <- predict(tree, train, type = 'class')
 
-confusionMatrix(p, train$yesno, positive="y")
 #| Then, by creating a confusion model, we can evaluate the performance of this 
 #| model. 
+confusionMatrix(p, train$yesno, positive="y")
+
+#| At least that's what SHOULD happen.  Why are the above lines using the train
+#| data?  It should be the following, no?
+p <- predict(tree, test, type = 'class')
+confusionMatrix(p, test$yesno, positive="y")
+
+
 
 #Please make sure you mention positive classes in the confusion matrix.
 # 
