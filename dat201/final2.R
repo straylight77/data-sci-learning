@@ -46,7 +46,7 @@ nrow(df.raw[ df.raw$FACE == 0, ]) / nrow(df.raw) * 100
 # determine a regression model only for customers who purchased.  
 
 
-# Ceate a final data frame (df) that will be used for the remaining analysis
+# Create a final data frame (df) that will be used for the remaining analysis
 df = df.raw[ df.raw$FACE>0, c("GENDER", "AGE", "INCOME", "FACE")]
 df$lnINCOME = log(df$INCOME)
 df$lnFACE = log(df$FACE)
@@ -69,6 +69,10 @@ round(df.cor[6,], 2)
 
 pairs(~ lnFACE + GENDER + AGE + lnINCOME, data=df, lower.panel=NULL, gap=0)
 
+# CONCLUSION:
+#  - Age does not appear to be linearly correlated to lnFace (-0.05)
+#  - Gender appears to have a weak linear relationship with lnFace (0.26)
+#  - lnIncome appears to have a strong linear relationship with lnFace (0.48)
 
 
 # ----------------------------------------------------------------------------
@@ -79,14 +83,15 @@ m = lm(lnFACE ~ GENDER + AGE + lnINCOME, data=df)
 m.summ = summary(m)
 m.summ
 
+
 # ----------------------------------------------------------------------------
 #    b. Find the estimated regression parameters
 
 cf = coef(m)
 B0 = cf[1]
-B1 = cf[2]
-B2 = cf[3]
-B3 = cf[4]
+B1 = cf[2]  # GENDER
+B2 = cf[3]  # AGE
+B3 = cf[4]  # lnINCOME
 
 round(cf, 3)
 
@@ -94,8 +99,7 @@ round(cf, 3)
 #      (Intercept)      GENDER         AGE    lnINCOME 
 #            4.502       0.876      -0.010       0.647 
 #
-#           y =   B0 +    B1 *     x1 +     B2 *  x2 +    B3 *       x3 
-#      lnFACE = 4.50 + 0.876 * GENDER + -0.010 * AGE + 0.647 * lnINCOME
+#      lnFACE = 4.50  +  0.876 GENDER  -  0.010 AGE  +  0.647 lnINCOME
 
 
 # ----------------------------------------------------------------------------
@@ -122,13 +126,70 @@ round(perf, 3)
 # ----------------------------------------------------------------------------
 #    d. Use T‐test to show – how important the explanatory variables are
 
+# For this analysis of significance, we will take the threshold to be 95%. 
+# Therefore our value for alpha = 0.05.  
+
+alpha = 0.05
+
+# By inspecting the report given by the function summary(), we can simply 
+# compare the p-values for each variable to our threshold (0.05).
+#
+#                Estimate Std. Error t value Pr(>|t|)    
+#   (Intercept)  4.501821   0.915055   4.920 1.51e-06 ***
+#   GENDER       0.875621   0.293576   2.983  0.00312 ** 
+#   AGE         -0.010196   0.007952  -1.282  0.20091    
+#   lnINCOME     0.647437   0.077576   8.346 3.65e-15 ***
+
+m.pvals = c(GENDER = m.summ$coefficients[2,4],
+        AGE = m.summ$coefficients[3,4],
+        lnINCOME = m.summ$coefficients[4,4]
+)
+
+round(m.pvals, 3)
+# P-values that are closer to 0 are relatively more significant.
+#    GENDER      AGE lnINCOME 
+#     0.003    0.201    0.000
 
 
+m.pvals < alpha
+# P-values that exceed our threshold (alpha) are not contributing to our model
+# in a meaningful way.
+#   GENDER      AGE lnINCOME 
+#     TRUE    FALSE     TRUE       
+
+# CONCLUSION:
+# If was found that Gender (p=0.003) and Income (p=0.00) significantly 
+# predicted values for Face.  Furthermore, Income was found to be a stronger 
+# predictor than Gender.  Lastly, Age (p=0.201) was found to NOT be a 
+# significant predictor.
 
 
 # ----------------------------------------------------------------------------
 # 4. Write down your interpretation as necessary so that a non‐statistician can
 # understand your explanation
+
+# Multiple linear regression was used to test if the age, gender and income of 
+# an individual that purchased life insurance would significantly predict the 
+# amount the company would pay in the event of death.  
+
+# The overall regression was NOT a good predictor of face values (that is, it 
+# was not statistically significant with R2 = 0.26)
+#
+# Looking at each of the explanatory variables, we can find a few more 
+# insights.  The following statements are made with a 95% threshold, meaning
+# we expect less that 5% probability of seeing these results by chance.
+#
+# Age was found to not be a good predictor of face (p=0.201).
+#
+# Gender was found to significantly predict face (p=0.003).  A value of 1 for 
+# gender, if all other variables remain fixed, leads to an increase in the 
+# predicted value for face by 88.3%.  It is unknown if this value for gender 
+# implies male or female for this data set. 
+exp(B1-1) * 100
+#
+# Income was found to significantly predict face (p=0.000).  For a 1% increase 
+# in income, if all other variables remain fixed, the model predicts a 64.7% 
+# increase in face (the payout amount).
 
 
 
