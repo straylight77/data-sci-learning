@@ -79,11 +79,9 @@
 
 # what is "      Detection Rate " - why do we need it.     
 #| DETECTION RATE = TP / (TP + TN + FP + FN)
-#| 
 
 # what is "Detection Prevalence " - why do we need it.     
 #| DETECTION PREVALENCE = (TP + FP) / (TP + TN + FP + FN)
-#| 
 
 # what does predict function do?
 #| When given an object of class 'tree' as the first argument, such as one 
@@ -251,6 +249,11 @@ confusionMatrix(p, test$yesno, positive="y")
 
 
 #ROC
+#| A model that shows a curve towards the top-left is considered better. As 
+#| the curve gets closer to the diagonal, the performance degradese towards
+#| beign a baseline random selection (i.e. flip a coin)
+#| In this case, we are much closer to the top-left corner than we are to the 
+#| diagonal line, indicating this is model is a good fit.  
 p1 <- predict(tree, test, type = 'prob')
 p1 <- p1[,2]
 r <- multiclass.roc(test$yesno, p1, percent = TRUE)
@@ -265,8 +268,6 @@ plot.roc(r1,
         auc.polygon.col="lightblue",
         print.thres=TRUE,
         main= 'ROC Curve')
-
-#| TODO: https://www.dataschool.io/roc-curves-and-auc-explained/
 
 
 # Method 2- Regression  Tree
@@ -328,6 +329,8 @@ plotcp(tree)
  
  
 # Predict
+#| Not sure why we aren't using 'test' data here.  We should ealuate the 
+#| performance of the model using data not used in the creation of it.  
 p <- predict(tree, train)
 
 # Root Mean Square Error
