@@ -154,6 +154,12 @@ test <- mydata[ind == 2,]
 
 #| The next 2 lines creates a new classification model using the training data
 #| and plots a diagram of it.  
+#| For example, the 2nd node along the left branch of the root ("n, 0.23, 75%")
+#| show the following:
+#|    1. n -> The prediction at this point is "not spam"
+#|    2. 0.23 -> there is a 23% chance of being spam at this point in the tree
+#|    3. 75% -> the proportion of the data that has <5.6% dollar sign 
+#|              characters (decision from the previous node)
 
 tree <- rpart(yesno ~., data = train)
 rpart.plot(tree)
@@ -237,7 +243,11 @@ confusionMatrix(p, test$yesno, positive="y")
 #  
 
 #| SPAM CLASSIFIER PERFORMANCE RESULTS:
-#| The accuracy of this model is 85% which is pretty good.  
+#| The overall accuracy of this model is 85% which is pretty good.  
+#| We would want to minimize the number of false positives.  Better to allow 
+#| real spam into the user's inbox than to incorrectly remove legitimate email.
+#| We can use Sensitivity to measure this:  
+#|     76.44% -> not great but still better than a simple guess (50%)
 
 
 #ROC
@@ -264,12 +274,18 @@ plot.roc(r1,
 data('BostonHousing')
 mydata <- BostonHousing
  
+
 #Data Partition
+#| As above, separate our data sample into two mutually exclusive groups:
+#| training data (used to create our model) and testing data (used to evaluate
+#| our model's performance)
 set.seed(1234)
 ind <- sample(2, nrow(mydata), replace = T, prob = c(0.5, 0.5))
 train <- mydata[ind == 1,]
 test <- mydata[ind == 2,]
+
 #Regression tree
+#| Create a model using the 'train' data set and plot a diagram of it.
 tree <- rpart(medv ~., data = train)
 rpart.plot(tree)
 
@@ -290,6 +306,9 @@ printcp(tree)
 # 6 0.028018      5   0.24075 0.37848 0.066389
 # 7 0.015141      6   0.21274 0.34877 0.065824
 # 8 0.010000      7   0.19760 0.33707 0.065641
+
+#| Similar to the tree diagram above, we can also see the decision rules of
+#| of each node in the tree as a list
 rpart.rules(tree)
 #medv                                                                       
 # 13 when lstat >=        14.8 & crim >= 5.8   
@@ -301,19 +320,26 @@ rpart.rules(tree)
 # 40 when lstat <  7.2         & rm <  7.5        & age >= 89                 
 # 45 when lstat <  7.2         & rm >=        7.5       
 
+#| The leftmost value where the mean is below the horizontal line (0.4) is 
+#| 0.031.  It would be worth creating another model with cp=0.031 and compare
+#| performance of each.
 plotcp(tree)
 
  
  
 # Predict
 p <- predict(tree, train)
+
 # Root Mean Square Error
- 
+#| Corresponds to the average difference between the observed known values of 
+#| the outcome and the predicted value by the model.  Lower is better.
 sqrt(mean((train$medv-p)^2))
 #4.130294
  
 # R Square
- 
+#| Explains the amount of variation in the response variable ('medv' in this 
+#| case) that is due to variation in the feature variables as a percentage.  
+#| A higher number indicates a good fit for the model.
 (cor(train$medv,p))^2
 #0.8024039
  
