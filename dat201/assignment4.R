@@ -11,8 +11,6 @@
 # 2. every argument/parameters
 # 3. Explain the followings - 
 
-#| https://www.dataschool.io/simple-guide-to-confusion-matrix-terminology/
-
 # what is Confusion Matrix
 #| A confusion matrix visualizes and summarizes the performance of a 
 #| classification algorithm.  It compares the number of predicted values and 
@@ -45,7 +43,8 @@
 #| Technically, this is referred to as the homogeneity of the contingency table 
 #| (specifically the marginal homogeneity). Therefore, the McNemar’s test is a 
 #| type of homogeneity test for contingency tables.
-#|    e.g. used in medicine to compare the effect of a treatment against a control.
+#|    e.g. used in medicine to compare the effect of a treatment against a 
+#|    control.
 #|    p > alpha: fail to reject H0, no difference in the disagreement 
 #|      (e.g. treatment had no effect).
 #|    p <= alpha: reject H0, significant difference in the disagreement 
@@ -140,7 +139,7 @@ mydata <- spam7
 #| The training data will be used to determine the details of the model (i.e.
 #| the coefficients, branches, etc.)  The test data will be used to check the
 #| performance (i.e. accuracy, recall, etc.) This is a good way to test since 
-#| the model has never seen the test before and is not influcenced by it. 
+#| the model has never seen the test before and is not influenced by it. 
 set.seed(1234)
 ind <- sample(2, nrow(mydata), replace = T, prob = c(0.5, 0.5))
 train <- mydata[ind == 1,]
@@ -151,9 +150,8 @@ test <- mydata[ind == 2,]
 ?rpart.object # algorithm that creates the dicisions
 
 #| The next 2 lines creates a new classification model using the training data
-#| and plots a diagram of it.  
-#| For example, the 2nd node along the left branch of the root ("n, 0.23, 75%")
-#| show the following:
+#| and plots a diagram of it.  For example, the 2nd node along the left branch 
+#| of the root ("n, 0.23, 75%") shows the following:
 #|    1. n -> The prediction at this point is "not spam"
 #|    2. 0.23 -> there is a 23% chance of being spam at this point in the tree
 #|    3. 75% -> the proportion of the data that has <5.6% dollar sign 
@@ -162,7 +160,7 @@ test <- mydata[ind == 2,]
 tree <- rpart(yesno ~., data = train)
 rpart.plot(tree)
 
-#| cp is the "complexity paramater".  rpart() uses it to determine a threshold
+#| cp is the "complexity parameter".  rpart() uses it to determine a threshold
 #| value of when to attempt a split.  Any split that does not decrease the 
 #| overall lack of fit by a factor of cp is not attempted.  This is to save 
 #| computing time by pruning off splits that are obviously not worthwhile.
@@ -242,7 +240,8 @@ confusionMatrix(p, test$yesno, positive="y")
 
 #| SPAM CLASSIFIER PERFORMANCE RESULTS:
 #| The overall accuracy of this model is 85% which is pretty good.  
-#| We would want to minimize the number of false positives.  Better to allow 
+#| For this use case of detecting unwanted spam emails, we would want to 
+#| minimize the number of false positives.  Better to allow 
 #| real spam into the user's inbox than to incorrectly remove legitimate email.
 #| We can use Sensitivity to measure this:  
 #|     76.44% -> not great but still better than a simple guess (50%)
@@ -250,10 +249,10 @@ confusionMatrix(p, test$yesno, positive="y")
 
 #ROC
 #| A model that shows a curve towards the top-left is considered better. As 
-#| the curve gets closer to the diagonal, the performance degradese towards
-#| beign a baseline random selection (i.e. flip a coin)
-#| In this case, we are much closer to the top-left corner than we are to the 
-#| diagonal line, indicating this is model is a good fit.  
+#| the curve gets closer to the diagonal, the performance degrades towards
+#| a baseline random selection (i.e. flip a coin).  In this case, we are much 
+#| closer to the top-left corner than we are to the diagonal line, indicating 
+#| that this model is a good fit to our sample data.
 p1 <- predict(tree, test, type = 'prob')
 p1 <- p1[,2]
 r <- multiclass.roc(test$yesno, p1, percent = TRUE)
@@ -329,7 +328,7 @@ plotcp(tree)
  
  
 # Predict
-#| Not sure why we aren't using 'test' data here.  We should ealuate the 
+#| Not sure why we aren't using 'test' data here.  We should evaluate the 
 #| performance of the model using data not used in the creation of it.  
 p <- predict(tree, train)
 
@@ -342,7 +341,7 @@ sqrt(mean((train$medv-p)^2))
 # R Square
 #| Explains the amount of variation in the response variable ('medv' in this 
 #| case) that is due to variation in the feature variables as a percentage.  
-#| A higher number indicates a good fit for the model.
+#| A higher number that is closer to 1 indicates a good fit for the model.
 (cor(train$medv,p))^2
 #0.8024039
  
