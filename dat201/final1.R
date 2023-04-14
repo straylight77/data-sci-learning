@@ -21,27 +21,28 @@
 #       and decision‐making rule.
 # 7. Make an overall comment for the non‐statistician audience
 
-
-# https://www.statology.org/how-to-report-regression-results/
-
+# Data can be found here:
+# https://instruction.bus.wisc.edu/jfrees/jfreesbooks/regression%20modeling/bookwebdec2010/CSVData/UNLifeExpectancy.csv
 
 setwd("~/data-sci-learning/dat201/")
 df.raw = read.csv("UNLifeExpectancy.csv")
 
-summary(df.raw)
+df = df.raw[,c("LIFEEXP", "FERTILITY", "PUBLICEDUCATION", "PRIVATEHEALTH")]
 
+summary(df)
 df.raw[ is.na(df.raw$FERTILITY), ]
 df.raw[ is.na(df.raw$PUBLICEDUCATION), ]
 
-#TODO: should add some initial summary stats and cleaning
-
-df = df.raw
+attach(df)
+hist(FERTILITY)
+hist(PRIVATEHEALTH)
+hist(PUBLICEDUCATION)
+hist(LIFEEXP)
 
 # ----------------------------------------------------------------------------
 # 1. Examining the relation between y = LIFEEXP and x = FERTILITY.
+cor1 = cor(df$LIFEEXP, df$FERTILITY, use="complete.obs")         # -0.8067466
 plot(LIFEEXP ~ FERTILITY, data = df)
-cor(df$LIFEEXP, df$FERTILITY, use="complete.obs")         # -0.8067466
-
 
 
 # ----------------------------------------------------------------------------
@@ -49,14 +50,19 @@ cor(df$LIFEEXP, df$FERTILITY, use="complete.obs")         # -0.8067466
 #    x = FERTILITY.
 
 m = lm(LIFEEXP ~ FERTILITY, data = df)
-summary(m)
 abline(m, col="red")
+m.summ = summary(m)
+m.summ
 
-# Coefficients:
-#             Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)  83.7381     1.0439   80.22   <2e-16 ***
-# FERTILITY    -5.2735     0.2887  -18.27   <2e-16 ***
-# Multiple R-squared:  0.6508,	Adjusted R-squared:  0.6489
+# RESULTS
+#
+#       LIFEEXP = 83.7381 + (-5.2735) FERTILITY
+#
+#                Estimate Std. Error t value Pr(>|t|)    
+#    (Intercept)  83.7381     1.0439   80.22   <2e-16 ***
+#    FERTILITY    -5.2735     0.2887  -18.27   <2e-16 ***
+#    Multiple R-squared:  0.6508,	Adjusted R-squared:  0.6489
+#    F-statistic: 89.64 on 3 and 148 DF,  p-value: < 2.2e-16
 
 
 # ----------------------------------------------------------------------------
@@ -82,18 +88,45 @@ round(pred, 2)
 #    FERTILITY, PUBLICEDUCATION, and lnHEALTH (the natural logarithmic transform
 #    of PRIVATEHEALTH).
 
+# First, let's examine these explanatory variables including PRIVATEHEALTH,
+# before we trasnform it to lnHEALTH
+
+pairs(~ LIFEEXP + FERTILITY + PUBLICEDUCATION + PRIVATEHEALTH,
+      lower.panel=NULL, 
+      gap=0, 
+      data=df)
+
+hist(df$PRIVATEHEALTH)
+abline(v=mean(df$PRIVATEHEALTH, na.rm=TRUE), col="red")
+plot(LIFEEXP ~PRIVATEHEALTH, data=df)
+
+# OBSERVATION: These plots show PRIVATEHEALTH is somewhat skewed with a few
+# upper outliers.  Relating it to LIFEEXP as such will be difficult. Attempting
+# a log transform to see if it helps makes sense. 
+
+# Next, calculate a new variable lnHEALTH and examine that before creating our
+# regression model
+
 df$lnHEALTH = log(df$PRIVATEHEALTH)
+hist(df$lnHEALTH)
+plot(LIFEEXP ~ lnHEALTH, data=df)
 
 pairs(~ LIFEEXP + FERTILITY + PUBLICEDUCATION + lnHEALTH,
       lower.panel=NULL, 
       gap=0, 
       data=df)
 
+# OBSERVATION: The plot looks much better for a linear regression.  Let's 
+# continue with developing the model.
+
 m2 = lm(LIFEEXP ~ FERTILITY + PUBLICEDUCATION + lnHEALTH, data=df)
 m2.summ = summary(m2)
 m2.summ
 
-# Coefficients:
+# RESULTS:
+#
+# y = 85.6264 + (-5.3993)x1 + (-0.1846)x2 + (-1.0296)x3
+#
 #                 Estimate Std. Error t value Pr(>|t|)    
 # (Intercept)      85.6264     2.0033  42.742   <2e-16 ***
 # FERTILITY        -5.3993     0.3308 -16.324   <2e-16 ***
@@ -101,6 +134,7 @@ m2.summ
 # lnHEALTH         -1.0296     0.9431  -1.092    0.277    
 # Multiple R-squared:  0.645,	Adjusted R-squared:  0.6378
 # F-statistic: 333.7 on 1 and 179 DF,  p-value: < 2.2e-16
+
 
 # ----------------------------------------------------------------------------
 #    a. Interpret the regression coefficient associated with public education.
@@ -112,13 +146,12 @@ round(B2, 3)
 # expect a drop in life expectancy by 0.185 years.
 
 
-
 # ----------------------------------------------------------------------------
 #    b. Interpret the regression coefficient associated with health expenditures 
 #       without using the logarithmic scale for expenditures.
 
-# To restate our regression equation:
-#            y = B0 + B1*x1 + B2*x2 + B3*log(x3)    where x3 => lnHEALTH
+# To restate the generic regression equation:
+#            y = B0 + B1*x1 + B2*x2 + B3*log(x3)      where x3=lnHEALTH
 #
 # A change in y will be calculated as: 
 #      delta.y = y.new - y.old
@@ -136,7 +169,6 @@ B3 * log(1.01)                  # -0.01024474
 # CONCLUSION:
 # For a 1% change in health expenditure, if all other variables remain fixed, 
 # the predicted change in life expectancy is reduced by 0.01 years.
-
 
 
 # ----------------------------------------------------------------------------
@@ -170,14 +202,19 @@ round(c("alpha"=alpha, "T"=t.stat, "P"=p.value), 3)
 # other words, is statistically insignificant and of no use in the model.  
 
 
-
 # ----------------------------------------------------------------------------
 # 7. Make an overall comment for the non‐statistician audience
 
 # Multiple linear regression was used to test if number of children, years of 
 # education and spending on health care significantly predicted life expectancy.
 #
-# The fitted regression model was: [fitted regression equation]
+# The fitted regression model was: 
+#        y = 85.6264 + (-5.3993)x1 + (-0.1846)x2 + (-1.0296)x3
+#    where:
+#        y = LIFEEXP
+#       x1 = FERTILITY
+#       x2 = PUBLICEDUCATION
+#       x3 = lnHEALTH
 #
 # The overall regression was statistically significant 
 # (R2 = 0.645, F(3, 148) = 89.64, p = 0).
@@ -192,8 +229,3 @@ round(c("alpha"=alpha, "T"=t.stat, "P"=p.value), 3)
 # 
 # It was found that amount spent on health care did not significantly predict 
 # life expectancy (β = -1.0296, p = 0.277).
-
-
-
-
-
