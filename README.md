@@ -1,6 +1,6 @@
 # Certificate in Data Science (McMaster University)
 
-[Program Overview](/https://continuing.mcmaster.ca/programs/tech-data/data-science/)
+[Program Overview](https://continuing.mcmaster.ca/programs/tech-data/data-science/)
 
 ### DAT 201 - Data Analytics & Modelling
 
