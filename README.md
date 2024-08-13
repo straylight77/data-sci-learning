@@ -6,7 +6,8 @@
 
 This course offers an introduction to data science and machine learning paving the way for students to learn data analytics principles. In particular, this course begins with a brief history of data analytics and data science, followed by regression analysis, regression and classification trees, and ends with introductions to K-means clustering, principal component analysis (PCA). Each lecture has associated with it a practical lab session which students will put theory into practice offering students a hands-on approach to learning the material.
 
-[Final Report](https://github.com/straylight77/data-sci-learning/blob/master/dat201/final_report_ColinBowers.pdf)
+[Final Report: Linear Regression of Life Expectancy and Term Life Insurance
+](https://github.com/straylight77/data-sci-learning/blob/master/dat201/final_report_ColinBowers.pdf)
 
 ### DAT 202 - Data Management
 
