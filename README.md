@@ -26,9 +26,3 @@ _Final Project:_ [Predicting Customer Churn For E-Commerce](https://github.com/s
 Building on the fundamental principles of data analytics, this course advances to modern machine learning techniques such as neural network, deep learning, and reinforcement learning as well as NLP and text analysis. Application activities will be structured to provide an introductory level of how machine learning techniques are applied to big data analytics.
 
 _No final project._
-
-### DAT 205 - Data Science Capstone Project 
-
-The course provides students with a real-world business problem/project in order to apply analytics models, methodologies and tools learned in the program. Faculty mentors will work with students to ensure the capstone project reflects, and encompasses, best practices for project management, data analytics and data science.
-
-_Expected Dec 2024_
